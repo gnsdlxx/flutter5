@@ -3,10 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-<<<<<<< HEAD
-=======
   file_selector_linux
->>>>>>> 111f93d (flutter)
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

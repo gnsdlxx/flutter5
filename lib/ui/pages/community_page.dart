@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io'; // File 클래스 관련
-import 'package:image_picker/image_picker.dart';
 
 void main() => runApp(const MyApp());
 
@@ -158,8 +156,19 @@ class _PostDetailPageState extends State<PostDetailPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              // 수정 로직
+            onPressed: () async {
+              final updatedPost = await Navigator.push<Map<String, dynamic>>(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WritePostPage(
+                    initialTitle: widget.post['title'],
+                    initialContent: widget.post['content'],
+                  ),
+                ),
+              );
+              if (updatedPost != null) {
+                widget.onUpdate(updatedPost);
+              }
             },
           ),
           IconButton(
@@ -182,11 +191,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
             ),
             const SizedBox(height: 20),
             Text(widget.post['content'], style: const TextStyle(fontSize: 16)),
-            if (widget.post['imageUrl'] != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Image.network(widget.post['imageUrl']),
-              ),
             const SizedBox(height: 20),
             const Text('댓글', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Expanded(
@@ -221,7 +225,14 @@ class _PostDetailPageState extends State<PostDetailPage> {
 }
 
 class WritePostPage extends StatefulWidget {
-  const WritePostPage({Key? key}) : super(key: key);
+  final String? initialTitle;
+  final String? initialContent;
+
+  const WritePostPage({
+    Key? key,
+    this.initialTitle,
+    this.initialContent,
+  }) : super(key: key);
 
   @override
   _WritePostPageState createState() => _WritePostPageState();
@@ -230,16 +241,12 @@ class WritePostPage extends StatefulWidget {
 class _WritePostPageState extends State<WritePostPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
-  String? _imagePath;
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _imagePath = pickedFile.path;
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _titleController.text = widget.initialTitle ?? '';
+    _contentController.text = widget.initialContent ?? '';
   }
 
   void _submitPost() {
@@ -253,7 +260,7 @@ class _WritePostPageState extends State<WritePostPage> {
         'content': content,
         'author': '나의 반려견',
         'profileUrl': 'https://via.placeholder.com/50',
-        'imageUrl': _imagePath,
+        'imageUrl': null,
         'likes': 0,
         'comments': [],
       };
@@ -282,19 +289,6 @@ class _WritePostPageState extends State<WritePostPage> {
               decoration: const InputDecoration(labelText: '내용'),
               maxLines: 5,
             ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: const Text('이미지 첨부'),
-            ),
-            if (_imagePath != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Image.file(
-                  File(_imagePath!),
-                  height: 200,
-                ),
-              ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _submitPost,
