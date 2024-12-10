@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 class WritePostPage extends StatelessWidget {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
+  final Function(String, String) onPostUploaded; // 콜백 함수 추가
+
+  WritePostPage({required this.onPostUploaded, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +34,10 @@ class WritePostPage extends StatelessWidget {
                 return;
               }
 
-              // 업로드 로직
-              print('Title: $title');
-              print('Content: $content');
+              // 업로드 후 콜백 호출
+              onPostUploaded(title, content);
 
-              // 업로드 완료 후 이전 화면으로 이동
+              // 업로드 후 이전 화면으로 돌아가기
               Navigator.pop(context);
             },
             child: const Text(
